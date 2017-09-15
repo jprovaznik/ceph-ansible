@@ -43,3 +43,12 @@
     enabled: yes
   changed_when: false
   with_items: "{{ devices }}"
+
+- name: wait for osd socket to exist
+  shell: docker exec ceph-osd-{{ ansible_hostname }}-dev{{ item | basename }} stat /var/run/ceph/{{ cluster }}-osd.*.asok
+  register: osd_socket
+  failed_when: false
+  retries: 5
+  delay: 15
+  until: osd_socket.rc == 0
+  with_items: "{{ devices }}"

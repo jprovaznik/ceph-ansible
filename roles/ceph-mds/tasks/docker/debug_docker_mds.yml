@@ -1,4 +1,8 @@
 ---
+- name: set_fact
+  set_fact:
+    ceph_mds_docker_extra_env: -e DEBUG=verbose
+
 - name: generate systemd unit file
   become: true
   template:
@@ -8,11 +12,6 @@
     group: "root"
     mode: "0644"
 
-- name: enable systemd unit file for mds instance
-  shell: systemctl enable ceph-mds@{{ ansible_hostname }}.service
-  failed_when: false
-  changed_when: false
-
 - name: reload systemd unit files
   shell: systemctl daemon-reload
   changed_when: false
@@ -21,15 +20,16 @@
 - name: systemd start mds container
   service:
     name: ceph-mds@{{ ansible_hostname }}
-    state: started
+    state: restarted
     enabled: yes
   changed_when: false
 
-- name: wait for mds socket to exist
-  shell: |
-    {{ docker_exec_cmd }} bash -c 'stat {{ rbd_client_admin_socket_path }}/{{ cluster }}-mds*.asok > /dev/null 2>&1'
-  register: mds_socket
-  failed_when: false
-  retries: 5
-  delay: 15
-  until: mds_socket.rc == 0
+- name: wait for the container to run again
+  command: sleep 20
+
+- name: show container logs
+  command: journalctl -u ceph-mds@{{ ansible_hostname }}
+
+- name: fail the playbook
+  fail:
+    msg: "Go debug!"

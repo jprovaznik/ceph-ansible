@@ -5,4 +5,9 @@
 
 - include: copy_configs.yml
 - include: start_docker_mds.yml
+
+- include: debug_docker_mds.yml
+  when:
+    - mds_socket.rc != 0
+
 - include: enable_multimds.yml

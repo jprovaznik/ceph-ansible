@@ -2,4 +2,8 @@
 - include: copy_configs.yml
 - include: start_docker_rgw.yml
 
+- include: debug_docker_rgw.yml
+  when:
+    - rgw_socket.rc != 0
+
 - include: copy_rgw_configs.yml

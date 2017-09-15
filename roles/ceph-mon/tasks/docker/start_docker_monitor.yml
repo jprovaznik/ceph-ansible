@@ -65,3 +65,13 @@
     state: started
     enabled: yes
   changed_when: false
+
+- name: wait for monitor socket to exist
+  shell: |
+    docker logs ceph-mon-{{ ansible_hostname }} | grep -sq SUCCESS
+  failed_when: false
+  register: monitor_socket
+  retries: 5
+  delay: 15
+  until: monitor_socket.rc == 0
+
