@@ -7,4 +7,7 @@
   with_together:
     - "{{ ceph_config_keys }}"
     - "{{ statconfig.results }}"
-  when: item.1.stat.exists == true
+  when:
+    - inventory_hostname == groups.get(mon_group_name) | first
+    - item.1.stat.exists == true
+    - ceph_health.stdout_lines | length == 0
